@@ -13,7 +13,7 @@ namespace RestImg
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddMemoryCache();
+
             builder.Services.AddRestImg();
 
             var app = builder.Build();

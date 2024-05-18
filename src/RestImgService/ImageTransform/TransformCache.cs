@@ -13,7 +13,8 @@ namespace RestImgService.ImageTransform
         }
         public int GetCacheKey(string imagePath, TransformRequest transformRequest)
         {
-            return HashCode.Combine(imagePath, transformRequest.Width, transformRequest.Height);
+            return HashCode.Combine(imagePath, transformRequest.Width, transformRequest.Height,
+                transformRequest.Quality, transformRequest.Format);
         }
         public SKData? Get(string imagePath, TransformRequest transformRequest)
         {

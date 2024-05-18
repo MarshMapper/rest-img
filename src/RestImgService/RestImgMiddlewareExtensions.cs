@@ -12,6 +12,7 @@ namespace RestImgService
         }
         public static void AddRestImg(this IServiceCollection services)
         {
+            services.AddMemoryCache();
             services.AddTransient<DynamicImage>();
             services.AddTransient<TransformRequestReader>();
             services.AddTransient<ImageExtension>();
