@@ -26,4 +26,4 @@ One of w or h must be specified, all others are optional
 	
 	https://localhost:xxxx/zowie.jpg?h=300
 	
-	Will return the included sample image resized to a height of 300 pixels with aspect ration maintained
+will return the included sample image resized to a height of 300 pixels with aspect ratio maintained
