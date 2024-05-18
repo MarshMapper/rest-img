@@ -35,29 +35,18 @@ namespace RestImgService
         }
         public async Task InvokeAsync(HttpContext context)
         {
-            var path = context.Request.Path;
             _logger.LogInformation($"RestImg called for URL: {UriHelper.GetDisplayUrl(context.Request)}");
 
-            // nothing to do if current request is not for an image
-            if (path == null || !path.HasValue || context.Request.Query.Count == 0 || !IsImageRequest(path))
+            TransformRequest? transformRequest = GetValidTransformRequest(context);
+            if (transformRequest == null)
             {
-                await _next.Invoke(context);
-                return;
-            }
-
-            // if request is invalid, let the next middleware handle it
-            var transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
-            if (!transformRequest.IsValid())
-            {
+                // if request was not for a resized image or was invalid, let the next middleware handle it
                 await _next.Invoke(context);
                 return;
             }
             _logger.LogInformation($"RestImg valid request: Width: {transformRequest.Width}, Height: {transformRequest.Height}");
 
-            var imagePath = Path.Combine(
-                _environment.WebRootPath ?? String.Empty,
-                path.Value.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar));
-
+            string imagePath = MapImagePath(context.Request.Path);
             if (!File.Exists(imagePath))
             {
                 await _next.Invoke(context);
@@ -72,6 +61,35 @@ namespace RestImgService
             await context.Response.Body.WriteAsync(imageData.ToArray(), 0, (int)imageData.Size);
 
             imageData.Dispose();
+        }
+        private string MapImagePath(PathString path)
+        {
+            if (path == null || !path.HasValue)
+            {
+                return String.Empty;
+            }
+
+            return Path.Combine(_environment.WebRootPath ?? String.Empty,
+                path.Value.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar));
+        }
+        private TransformRequest? GetValidTransformRequest(HttpContext context)
+        {
+            TransformRequest? transformRequest = null;
+            PathString path = context.Request.Path;
+
+            // first check if the request is for an image and has query parameters
+            if (path != null && path.HasValue && context.Request.Query.Count > 0 && IsImageRequest(path))
+            {
+                // get the transformation parameters from the query string
+                transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
+                if (!transformRequest.IsValid())
+                {
+                    // don't return an invalid request
+                    transformRequest = null;
+                }
+            }
+            
+            return transformRequest;
         }
         private bool IsImageRequest(PathString path)
         {
