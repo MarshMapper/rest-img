@@ -1,0 +1,6 @@
+@RestImg_HostAddress = http://localhost:5036
+
+GET {{RestImg_HostAddress}}/zowie.jpg?w=400
+Accept: image/jpeg
+
+###

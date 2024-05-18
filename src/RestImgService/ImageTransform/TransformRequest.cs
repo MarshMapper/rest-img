@@ -1,0 +1,25 @@
+﻿namespace RestImgService.ImageTransform
+{
+    public class TransformRequest
+    {
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public string Format { get; set; }
+        public int Quality { get; set; } = 75;
+        public TransformRequest()
+        {
+            Format = ImageExtension.DefaultExtension;
+        }
+        public TransformRequest(int width, int height, string format, int quality)
+        {
+            Width = width;
+            Height = height;
+            Format = format;
+            Quality = quality;
+        }
+        public bool IsValid()
+        {
+            return (Width > 0 || Height > 0) && (Quality > 0);
+        }
+    }
+}
