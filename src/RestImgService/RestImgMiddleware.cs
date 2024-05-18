@@ -45,7 +45,7 @@ namespace RestImgService
                 return;
             }
 
-            // if request is invalid, don't do anything
+            // if request is invalid, let the next middleware handle it
             var transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
             if (!transformRequest.IsValid())
             {
@@ -66,7 +66,7 @@ namespace RestImgService
 
             var imageData = _dynamicImage.GetImageData(imagePath, transformRequest);
 
-            // write to stream
+            // provide the response and terminate the pipeline
             context.Response.ContentType = _imageExtension.GetContentType(transformRequest.Format);
             context.Response.ContentLength = imageData.Size;
             await context.Response.Body.WriteAsync(imageData.ToArray(), 0, (int)imageData.Size);

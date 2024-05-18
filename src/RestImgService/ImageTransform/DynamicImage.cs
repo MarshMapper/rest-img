@@ -6,12 +6,15 @@ namespace RestImgService.ImageTransform
     public class DynamicImage
     {
         private ILogger<RestImgMiddleware> _logger;
+        private ImageExtension _imageExtension;
         private TransformCache _transformCache;
 
         public DynamicImage(ILogger<RestImgMiddleware> logger,
+            ImageExtension imageExtension,
             TransformCache transformCache)
         {
             _logger = logger;
+            _imageExtension = imageExtension;
             _transformCache = transformCache;
         }
         public SKData GetImageData(string imagePath, TransformRequest transformRequest)
@@ -44,7 +47,7 @@ namespace RestImgService.ImageTransform
             var resizedBitmap = bitmap.Resize(resizedImageInfo, SKFilterQuality.High);
 
             var resizedImage = SKImage.FromBitmap(resizedBitmap);
-            var encodeFormat = transformRequest.Format == "png" ? SKEncodedImageFormat.Png : SKEncodedImageFormat.Jpeg;
+            var encodeFormat = _imageExtension.GetEncodedImageFormat(transformRequest.Format);
             imageData = resizedImage.Encode(encodeFormat, transformRequest.Quality);
 
             // cache the result

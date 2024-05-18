@@ -2,6 +2,12 @@
 {
     public class TransformRequest
     {
+        private readonly string[] _outputFormats = [
+            "jpg",
+            "jpeg",
+            "webp",
+            "png"
+        ];
         public int Width { get; set; }
         public int Height { get; set; }
         public string Format { get; set; }
@@ -19,7 +25,8 @@
         }
         public bool IsValid()
         {
-            return (Width > 0 || Height > 0) && (Quality > 0);
+            return (Width > 0 || Height > 0) && _outputFormats.Contains(Format) &&
+                (Quality >= 0 && Quality <= 100);
         }
     }
 }
