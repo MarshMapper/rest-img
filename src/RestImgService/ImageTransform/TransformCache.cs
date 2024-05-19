@@ -16,18 +16,18 @@ namespace RestImgService.ImageTransform
             return HashCode.Combine(imagePath, transformRequest.Width, transformRequest.Height,
                 transformRequest.Quality, transformRequest.Format);
         }
-        public SKData? Get(string imagePath, TransformRequest transformRequest)
+        public ImageData? Get(string imagePath, TransformRequest transformRequest)
         {
             int cacheKey = GetCacheKey(imagePath, transformRequest);
             byte[]? imageBytes;
             bool isCached = _memoryCache.TryGetValue(cacheKey, out imageBytes);
             if (isCached)
             {
-                return SKData.CreateCopy(imageBytes);
+                return new ImageData(SKData.CreateCopy(imageBytes));
             }
             return null;
         }
-        public void Set(string imagePath, TransformRequest transformRequest, SKData imageData)
+        public void Set(string imagePath, TransformRequest transformRequest, ImageData imageData)
         {
             int cacheKey = GetCacheKey(imagePath, transformRequest);
             _memoryCache.Set(cacheKey, imageData.ToArray());
