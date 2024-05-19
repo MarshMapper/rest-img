@@ -44,19 +44,17 @@ namespace RestImgService.ImageTransform
             }
 
             var resizedImageInfo = new SKImageInfo(width, height, SKImageInfo.PlatformColorType, bitmap.AlphaType);
-            var resizedBitmap = bitmap.Resize(resizedImageInfo, SKFilterQuality.High);
 
-            var resizedImage = SKImage.FromBitmap(resizedBitmap);
-            var encodeFormat = _imageExtension.GetEncodedImageFormat(transformRequest.Format);
-            imageData = resizedImage.Encode(encodeFormat, transformRequest.Quality);
+            using (var resizedBitmap = bitmap.Resize(resizedImageInfo, SKFilterQuality.High))
+            using (var resizedImage = SKImage.FromBitmap(resizedBitmap))
+            {
+                var encodeFormat = _imageExtension.GetEncodedImageFormat(transformRequest.Format);
+                imageData = resizedImage.Encode(encodeFormat, transformRequest.Quality);
 
-            // cache the result
-            _transformCache.Set(imagePath, transformRequest, imageData);
-
-            // cleanup
-            resizedImage.Dispose();
+                // cache the result
+                _transformCache.Set(imagePath, transformRequest, imageData);
+            }
             bitmap.Dispose();
-            resizedBitmap.Dispose();
 
             return imageData;
         }

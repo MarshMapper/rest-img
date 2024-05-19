@@ -53,14 +53,13 @@ namespace RestImgService
                 return;
             }
 
-            var imageData = _dynamicImage.GetImageData(imagePath, transformRequest);
-
-            // provide the response and terminate the pipeline
-            context.Response.ContentType = _imageExtension.GetContentType(transformRequest.Format);
-            context.Response.ContentLength = imageData.Size;
-            await context.Response.Body.WriteAsync(imageData.ToArray(), 0, (int)imageData.Size);
-
-            imageData.Dispose();
+            using (var imageData = _dynamicImage.GetImageData(imagePath, transformRequest))
+            {
+                // provide the response and terminate the pipeline
+                context.Response.ContentType = _imageExtension.GetContentType(transformRequest.Format);
+                context.Response.ContentLength = imageData.Size;
+                await context.Response.Body.WriteAsync(imageData.ToArray(), 0, (int)imageData.Size);
+            }
         }
         private string MapImagePath(PathString path)
         {
