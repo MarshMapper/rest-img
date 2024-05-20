@@ -5,9 +5,13 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4508E8D8-0FD7-408F-B0CA-C8587A3E09EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestImgService", "src\RestImgService\RestImgService.csproj", "{B2A460AE-3ADA-4030-8F61-78A8CCA54A30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestImgService", "src\RestImgService\RestImgService.csproj", "{B2A460AE-3ADA-4030-8F61-78A8CCA54A30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestImg", "src\RestImg\RestImg.csproj", "{81FE760F-2C0B-44CC-B267-FEFAABB6F091}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RestImg", "src\RestImg\RestImg.csproj", "{81FE760F-2C0B-44CC-B267-FEFAABB6F091}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{ECAE0186-45EB-4F42-A3D7-90E218D3B354}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestImgTests", "tests\RestImgTests\RestImgTests.csproj", "{DDB704DB-B317-4743-A859-0D7690F977D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,6 +27,10 @@ Global
 		{81FE760F-2C0B-44CC-B267-FEFAABB6F091}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81FE760F-2C0B-44CC-B267-FEFAABB6F091}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81FE760F-2C0B-44CC-B267-FEFAABB6F091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDB704DB-B317-4743-A859-0D7690F977D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDB704DB-B317-4743-A859-0D7690F977D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDB704DB-B317-4743-A859-0D7690F977D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDB704DB-B317-4743-A859-0D7690F977D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B2A460AE-3ADA-4030-8F61-78A8CCA54A30} = {4508E8D8-0FD7-408F-B0CA-C8587A3E09EE}
 		{81FE760F-2C0B-44CC-B267-FEFAABB6F091} = {4508E8D8-0FD7-408F-B0CA-C8587A3E09EE}
+		{DDB704DB-B317-4743-A859-0D7690F977D0} = {ECAE0186-45EB-4F42-A3D7-90E218D3B354}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6098F6F7-2D9B-4F0B-9750-BFBDBA7DFA16}
