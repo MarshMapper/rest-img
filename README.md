@@ -1,5 +1,5 @@
 # rest-img
-.NET RESTful image transformation middleware 
+.NET RESTful image transformation middleware based on the SkiaSharp library.
 
 Dynamically transforms images based on query parameters.  These can be added after the path to any image.
 
@@ -25,5 +25,18 @@ One of w or h must be specified, all others are optional
 ## Example
 	
 	https://localhost:xxxx/zowie.jpg?h=300
+	https://localhost:xxxx/zowie.jpg?w=400
+	https://localhost:xxxx/zowie.jpg?w=600&fmt=wepb
 	
-will return the included sample image resized to a height of 300 pixels with aspect ratio maintained
+will return the included sample image resized to the width or height specified while maintaining the aspect ratio.
+
+
+# Roadmap
+There are several general purpose image content delivery networks but most do much more than simple resizing, and are not written in .NET.
+
+This is simple image transformation middleware for .NET that provides the functinality required to use Angular's NgOptimizedImage.
+This will allow simple self-hosting of images while using the directive.
+
+The next step will be to provide the required loader:
+
+[Configuring an image loader for NgOptimizedImage]https://angular.io/guide/image-directive#configuring-an-image-loader-for-ngoptimizedimage
