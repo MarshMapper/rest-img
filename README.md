@@ -39,4 +39,4 @@ This will allow simple self-hosting of images while using the directive.
 
 The next step will be to provide the required loader:
 
-[Configuring an image loader for NgOptimizedImage]https://angular.io/guide/image-directive#configuring-an-image-loader-for-ngoptimizedimage
+[Configuring an image loader for NgOptimizedImage](https://angular.io/guide/image-directive#configuring-an-image-loader-for-ngoptimizedimage)
