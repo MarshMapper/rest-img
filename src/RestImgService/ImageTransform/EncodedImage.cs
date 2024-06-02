@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using RestImgService.ImageFile;
+using SkiaSharp;
 
 namespace RestImgService.ImageTransform
 {
@@ -24,7 +25,7 @@ namespace RestImgService.ImageTransform
         }
         public void Dispose()
         {
-            _image.Dispose();
+            // we don't "own" the image so we don't dispose it
         }
     }
 }

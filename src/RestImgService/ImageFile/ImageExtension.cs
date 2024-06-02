@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace RestImgService.ImageTransform
+namespace RestImgService.ImageFile
 {
     public class ImageExtension
     {

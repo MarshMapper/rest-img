@@ -12,10 +12,14 @@ namespace RestImgService.ImageTransform
         {
             this.sKData = sKData;
         }
+        public ImageData(byte[] data) : this(SKData.CreateCopy(data))
+        {
+        }
         public byte[] ToArray()
         {
             return sKData.ToArray();
         }
+
         public long Size => sKData.Size;
         public void Dispose()
         {
