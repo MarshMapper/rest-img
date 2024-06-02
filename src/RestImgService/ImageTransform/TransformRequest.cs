@@ -1,4 +1,6 @@
-﻿namespace RestImgService.ImageTransform
+﻿using RestImgService.ImageFile;
+
+namespace RestImgService.ImageTransform
 {
     public class TransformRequest
     {

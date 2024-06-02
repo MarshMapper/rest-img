@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+using RestImgService.ImageFile;
 
 namespace RestImgService.ImageTransform
 {
+    /// <summary>
+    /// Gets an image file with the requested transformations applied
+    /// </summary>
     public class DynamicImage
     {
         private ILogger<RestImgMiddleware> _logger;
@@ -16,27 +20,36 @@ namespace RestImgService.ImageTransform
             _imageExtension = imageExtension;
             _transformCache = transformCache;
         }
-        public ImageData GetImageData(string imagePath, TransformRequest transformRequest)
+        public ImageData GetImageData(ImagePath imagePath, TransformRequest transformRequest)
         {
-            ImageData? imageData = _transformCache.Get(imagePath, transformRequest);
-            if (imageData != null)
+            string fullPath = imagePath.MapImagePath();
+            //
+            // .NET OutputCaching will be used to cache the resized image so we should not get multiple requests
+            // for the same resized image.  we may get multiple requests for the same image in different sizes,
+            // so cache the original image and resize it as needed.
+            //       
+            PixelMap? pixelMap = _transformCache.Get(imagePath, transformRequest);
+            if (pixelMap == null)
             {
+                pixelMap = PixelMap.Load(File.OpenRead(fullPath));
+
+                // cache the result
+                _transformCache.Set(imagePath, transformRequest, pixelMap);
+            }
+            else
+            {
+                // restore the pixelmap from the image data
                 _logger.LogInformation("Image found in cache");
-                return imageData;
             }
 
-            var bitmap = PixelMap.Load(File.OpenRead(imagePath));
-            ImageBounds bounds = ImageBounds.GetResizedImageBounds(bitmap, transformRequest.Width, transformRequest.Height);
+            ImageBounds bounds = ImageBounds.GetResizedImageBounds(pixelMap, transformRequest.Width, transformRequest.Height);
+            ImageData imageData;
 
-            using (var resizedBitmap = bitmap.Resize(bounds.Width, bounds.Height))
+            using (var resizedBitmap = pixelMap.Resize(bounds.Width, bounds.Height))
             using (var resizedImage = EncodedImage.FromPixelMap(resizedBitmap))
             {
                 imageData = resizedImage.Encode(transformRequest);
-
-                // cache the result
-                _transformCache.Set(imagePath, transformRequest, imageData);
             }
-            bitmap.Dispose();
 
             return imageData;
         }

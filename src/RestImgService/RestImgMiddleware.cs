@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
+using RestImgService.ImageFile;
 using RestImgService.ImageTransform;
 
 namespace RestImgService
@@ -16,26 +17,28 @@ namespace RestImgService
         private readonly ILogger<RestImgMiddleware> _logger;
         private readonly DynamicImage _dynamicImage;
         private readonly TransformRequestReader _transformRequestReader;
+        private readonly ImagePath _imagePath;
         private readonly ImageExtension _imageExtension;
-        private readonly IWebHostEnvironment _environment;
 
         public RestImgMiddleware(RequestDelegate next,
             ILogger<RestImgMiddleware> logger,
             DynamicImage dynamicImage,
             TransformRequestReader transformRequestReader,
-            ImageExtension imageExtension,
-            IWebHostEnvironment environment)
+            ImagePath imagePath,
+            ImageExtension imageExtension)
         {
             _next = next;
             _logger = logger;
             _dynamicImage = dynamicImage;
             _transformRequestReader = transformRequestReader;
+            _imagePath = imagePath;
             _imageExtension = imageExtension;
-            _environment = environment;
         }
         public async Task InvokeAsync(HttpContext context)
         {
             _logger.LogInformation($"RestImg called for URL: {UriHelper.GetDisplayUrl(context.Request)}");
+            // critical to do this right away so other methods can access _imagePath
+            _imagePath.SetContext(context);
 
             TransformRequest? transformRequest = GetValidTransformRequest(context);
             if (transformRequest == null)
@@ -46,14 +49,13 @@ namespace RestImgService
             }
             _logger.LogInformation($"RestImg valid request: Width: {transformRequest.Width}, Height: {transformRequest.Height}");
 
-            string imagePath = MapImagePath(context.Request.Path);
-            if (!File.Exists(imagePath))
+            if (!File.Exists(_imagePath.MapImagePath()))
             {
                 await _next.Invoke(context);
                 return;
             }
 
-            using (var imageData = _dynamicImage.GetImageData(imagePath, transformRequest))
+            using (var imageData = _dynamicImage.GetImageData(_imagePath, transformRequest))
             {
                 // provide the response and terminate the pipeline
                 context.Response.ContentType = _imageExtension.GetContentType(transformRequest.Format);
@@ -61,23 +63,14 @@ namespace RestImgService
                 await context.Response.Body.WriteAsync(imageData.ToArray(), 0, (int)imageData.Size);
             }
         }
-        private string MapImagePath(PathString path)
-        {
-            if (path == null || !path.HasValue)
-            {
-                return String.Empty;
-            }
 
-            return Path.Combine(_environment.WebRootPath ?? String.Empty,
-                path.Value.Replace('/', Path.DirectorySeparatorChar).TrimStart(Path.DirectorySeparatorChar));
-        }
         private TransformRequest? GetValidTransformRequest(HttpContext context)
         {
             TransformRequest? transformRequest = null;
             PathString path = context.Request.Path;
 
             // first check if the request is for an image and has query parameters
-            if (path != null && path.HasValue && context.Request.Query.Count > 0 && IsImageRequest(path))
+            if (path != null && path.HasValue && context.Request.Query.Count > 0 && _imagePath.IsImageRequest())
             {
                 // get the transformation parameters from the query string
                 transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
@@ -89,16 +82,6 @@ namespace RestImgService
             }
             
             return transformRequest;
-        }
-        private bool IsImageRequest(PathString path)
-        {
-            if ((path == null) || !path.HasValue)
-            {
-                return false;
-            }
-            string extension = Path.GetExtension(path.Value).ToLower();
-
-            return _imageExtension.IsValidExtension(extension);
         }
     }
 }
