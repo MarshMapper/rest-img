@@ -10,17 +10,17 @@ namespace RestImgService
     public static class RestImgMiddlewareExtensions
     {
         public const string CachingSection = "Caching";
-        public static bool IsCachingEnabled(ConfigurationManager configurationManager)
+        public static OutputCacheOptions GetOutputCacheOptions(ConfigurationManager configurationManager)
         {
             OutputCacheOptions outputCacheOptions = new();
             configurationManager.GetSection($"{CachingSection}:{OutputCacheOptions.OutputCache}")
                 .Bind(outputCacheOptions);
-            return outputCacheOptions.Enabled;
+            return outputCacheOptions;
         }
         public static IApplicationBuilder UseRestImg(this IApplicationBuilder app,
             ConfigurationManager configurationManager)
         {
-            if (IsCachingEnabled(configurationManager))
+            if (GetOutputCacheOptions(configurationManager).Enabled)
             {
                 return app.UseOutputCache().
                     UseMiddleware<RestImgMiddleware>();
@@ -32,9 +32,7 @@ namespace RestImgService
         {
             services.AddMemoryCache();
 
-            OutputCacheOptions outputCacheOptions = new();
-            configurationManager.GetSection($"{CachingSection}:{OutputCacheOptions.OutputCache}")
-                .Bind(outputCacheOptions);
+            OutputCacheOptions outputCacheOptions = GetOutputCacheOptions(configurationManager);
             if (outputCacheOptions.Enabled)
             {
                 services.AddOutputCache(options =>
