@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using RestImgService.ImageFile;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Options;
 
 namespace RestImgService.ImageTransform
 {
@@ -14,16 +15,17 @@ namespace RestImgService.ImageTransform
     /// </summary>
     public class TransformCache
     {
-        const int CACHE_DURATION_MINUTES = 5;
-
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<TransformCache> _logger;
+        private readonly ImageCacheOptions _options;
 
         public TransformCache(IMemoryCache memoryCache,
-            ILogger<TransformCache> logger)
+            ILogger<TransformCache> logger,
+            IOptions<ImageCacheOptions> options)
         {
             _memoryCache = memoryCache;
             _logger = logger;
+            _options = options.Value;
         }
         protected string GetCacheKey(ImagePath imagePath, TransformRequest transformRequest)
         {
@@ -54,13 +56,13 @@ namespace RestImgService.ImageTransform
         /// <param name="pixelMap"></param>
         public void Set(ImagePath imagePath, TransformRequest transformRequest, PixelMap pixelMap)
         {
-            TimeSpan expirationMinutes = TimeSpan.FromMinutes(CACHE_DURATION_MINUTES);
+            TimeSpan expirationSeconds = TimeSpan.FromSeconds(_options.CacheDuration);
 
-            var expirationTime = DateTime.Now.Add(expirationMinutes);
+            var expirationTime = DateTime.Now.Add(expirationSeconds);
 
             // need to use options to set custom callback for disposing the pixelmap
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetSlidingExpiration(expirationMinutes)
+                .SetSlidingExpiration(expirationSeconds)
                 .RegisterPostEvictionCallback(callback: RemovedCallback, state: this);
 
             string cacheKey = GetCacheKey(imagePath, transformRequest);

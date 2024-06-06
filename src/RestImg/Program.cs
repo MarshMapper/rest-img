@@ -14,7 +14,7 @@ namespace RestImg
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddRestImg();
+            builder.Services.AddRestImg(builder.Configuration);
 
             var app = builder.Build();
 
@@ -29,7 +29,7 @@ namespace RestImg
             app.UseAuthorization();
             app.MapControllers();
 
-            app.UseRestImg();
+            app.UseRestImg(builder.Configuration);
             app.UseStaticFiles();
 
             app.Run();

@@ -13,8 +13,25 @@ Then Use the service before the static file service:
             app.UseRestImg();
             app.UseStaticFiles();
 
-# Options / Parameters 
+# Configuration
+By default, the middleware will cache the original image files and the resized images.  The ImageFileCache
+will cache the original files and the OutputCache will cache the resized images.  The following configuration 
+settings control this behavior:
 
+      "Caching": {
+        // configure caching of the original files that will be resized
+        "ImageFileCache": {
+          "Enabled": true,
+          "TimeoutInSeconds": 300
+        },
+        // configure caching of the resized images using .NET Output Cache
+        "OutputCache": {
+          "Enabled": true,
+          "TimeoutInSeconds": 300
+        }
+      },
+
+# Query Parameters 
 One of w or h must be specified, all others are optional
 
 	w = width in pixels

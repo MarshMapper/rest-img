@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RestImgService.ImageFile;
 
 namespace RestImgService.ImageTransform
@@ -11,30 +12,40 @@ namespace RestImgService.ImageTransform
         private ILogger<RestImgMiddleware> _logger;
         private ImageExtension _imageExtension;
         private TransformCache _transformCache;
+        private ImageCacheOptions _options;
 
         public DynamicImage(ILogger<RestImgMiddleware> logger,
             ImageExtension imageExtension,
-            TransformCache transformCache)
+            TransformCache transformCache,
+            IOptions<ImageCacheOptions> options)
         {
             _logger = logger;
             _imageExtension = imageExtension;
             _transformCache = transformCache;
+            _options = options.Value;
         }
         public ImageData GetImageData(ImagePath imagePath, TransformRequest transformRequest)
         {
             string fullPath = imagePath.MapImagePath();
-            //
-            // .NET OutputCaching will be used to cache the resized image so we should not get multiple requests
-            // for the same resized image.  we may get multiple requests for the same image in different sizes,
-            // so cache the original image and resize it as needed.
+
+            // if enabled, .NET OutputCaching will be used to cache the resized image so we should not
+            // get multiple requests for the same resized image.  we may get multiple requests for the
+            // same image in different sizes, so cache the original image and resize it as needed.
             //       
-            PixelMap? pixelMap = _transformCache.Get(imagePath, transformRequest);
+            PixelMap? pixelMap = null;
+            if (_options.Enabled)
+            {
+                pixelMap = _transformCache.Get(imagePath, transformRequest);
+            }
             if (pixelMap == null)
             {
                 pixelMap = PixelMap.Load(File.OpenRead(fullPath));
 
-                // cache the result
-                _transformCache.Set(imagePath, transformRequest, pixelMap);
+                if (_options.Enabled)
+                {
+                    // cache the result
+                    _transformCache.Set(imagePath, transformRequest, pixelMap);
+                }
             }
             else
             {
