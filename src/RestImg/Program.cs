@@ -1,4 +1,5 @@
 using RestImgService;
+using AlbumCrawler;
 
 namespace RestImg
 {
@@ -15,6 +16,7 @@ namespace RestImg
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddRestImg(builder.Configuration);
+            builder.Services.AddAlbumCrawler(builder.Configuration);
 
             var app = builder.Build();
 
