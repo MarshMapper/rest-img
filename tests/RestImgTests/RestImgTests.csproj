@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\AlbumCrawler\AlbumCrawler.csproj" />
     <ProjectReference Include="..\..\src\RestImgService\RestImgService.csproj" />
   </ItemGroup>
 

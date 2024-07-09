@@ -28,14 +28,16 @@ namespace AlbumCrawler
             HashSet<Folder> folders = CreateFoldersFromMatches(matchingPaths);
 
             return folders;
+
         }
+
         /// <summary>
         /// takes a list of full paths containing matched files and creates a HashSet of the unique
         /// folders that contain those files.
         /// </summary>
         /// <param name="matchingPaths"></param>
         /// <returns></returns>
-        protected HashSet<Folder> CreateFoldersFromMatches(IEnumerable<string> matchingPaths)
+        public HashSet<Folder> CreateFoldersFromMatches(IEnumerable<string> matchingPaths)
         {
             HashSet<Folder> folders = new HashSet<Folder>(new FolderComparer());
 
