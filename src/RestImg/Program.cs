@@ -34,6 +34,11 @@ namespace RestImg
             app.UseRestImg(builder.Configuration);
             app.UseStaticFiles();
 
+
+            app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler, IWebHostEnvironment webHost) =>
+            {
+                return albumCrawler.Crawl();
+            });
             app.Run();
         }
     }
