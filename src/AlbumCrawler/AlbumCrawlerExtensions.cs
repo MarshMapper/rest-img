@@ -10,6 +10,7 @@ namespace AlbumCrawler
             ConfigurationManager configurationManager)
         {
             services.AddTransient<PhotoAlbumCrawler>();
+            services.AddTransient<AlbumCache>();
 
             services.Configure<AlbumCrawlerOptions>(
                 configurationManager.GetSection($"{AlbumCrawlerOptions.AlbumCrawler}"));

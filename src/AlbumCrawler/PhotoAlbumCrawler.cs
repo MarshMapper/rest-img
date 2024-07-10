@@ -1,7 +1,8 @@
-﻿using AlbumCrawler.Configuration;
-using AlbumCrawler.Models;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
+using AlbumCrawler.Configuration;
+using AlbumCrawler.Models;
+using Microsoft.Extensions.Logging;
 
 namespace AlbumCrawler
 {
@@ -13,12 +14,18 @@ namespace AlbumCrawler
     {
         private readonly AlbumCrawlerOptions _albumCrawlerOptions;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<PhotoAlbumCrawler> _logger;
+        private readonly AlbumCache _albumCache;
 
         public PhotoAlbumCrawler(IOptions<AlbumCrawlerOptions> options, 
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<PhotoAlbumCrawler> logger,
+            AlbumCache albumCache)
         {
             _albumCrawlerOptions = options.Value;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
+            _albumCache = albumCache;
         }
         /// <summary>
         /// Use FolderCrawler to find all folders containing photos and create an Album
@@ -35,6 +42,37 @@ namespace AlbumCrawler
                 startingFolderFullPath = MapPath(_albumCrawlerOptions.AlbumRoot);
                 extensions = _albumCrawlerOptions.PhotoExtensions;
             }
+            return GetOrCreateAlbums(startingFolderFullPath, extensions);
+        }
+        /// <summary>
+        /// Get the albums for the specified folder.  First check the cache, if not found
+        /// then crawl the folder and cache the results.
+        /// </summary>
+        /// <param name="startingFolderFullPath"></param>
+        /// <param name="extensions"></param>
+        /// <returns></returns>
+        public IEnumerable<Album> GetOrCreateAlbums(string startingFolderFullPath, string[] extensions)
+        {
+            IEnumerable<Album>? albums = _albumCache.Get(startingFolderFullPath);
+
+            if (albums == null)
+            {
+                // not found in cache, crawl the folder and cache the results
+                List<Album> foundAlbums = GetAlbums(startingFolderFullPath, extensions);
+                _albumCache.Set(foundAlbums, startingFolderFullPath);
+                albums = foundAlbums;
+            }
+
+            return albums;
+        }
+        /// <summary>
+        /// Get the albums for the specified folder.  Use FolderCrawler to find all folders containing photos
+        /// </summary>
+        /// <param name="startingFolderFullPath"></param>
+        /// <param name="extensions"></param>
+        /// <returns></returns>
+        public List<Album> GetAlbums(string startingFolderFullPath, string[] extensions)
+        {
             FolderCrawler folderCrawler = new();
 
             IEnumerable<Folder> folders = folderCrawler.Crawl(startingFolderFullPath, GetWildcardPatterns(extensions));
