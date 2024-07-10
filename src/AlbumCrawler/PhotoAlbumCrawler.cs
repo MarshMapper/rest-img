@@ -34,15 +34,46 @@ namespace AlbumCrawler
         /// <returns></returns>
         public IEnumerable<Album> Crawl()
         {
+            string startingFolderFullPath = GetStartingFolderFullPath();
+            string[] extensions = GetExtensions();
+
+            return GetOrCreateAlbums(startingFolderFullPath, extensions);
+        }
+        /// <summary>
+        /// Get the album summaries that contain description, etc but not the list of files.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<AlbumDto> GetAlbumSummaries()
+        {
+            return Crawl().Select(a => new AlbumDto(a));
+        }
+        /// <summary>
+        /// Get defualt starting folder full path.  If the AlbumCrawlerOptions specifies a starting folder, use it.
+        /// </summary>
+        /// <returns></returns>
+        public string GetStartingFolderFullPath()
+        {
             string startingFolderFullPath = ".";
+
+            if (_albumCrawlerOptions != null)
+            {
+                startingFolderFullPath = _albumCrawlerOptions.AlbumRoot;
+            }
+            return MapPath(startingFolderFullPath);
+        }
+        /// <summary>
+        /// Get the extensions to search for.  If the AlbumCrawlerOptions specifies extensions, use them.
+        /// </summary>
+        /// <returns></returns>
+        public string[] GetExtensions()
+        {
             string[] extensions = [ "jpg", "jpeg", "png", "gif" ];
 
             if (_albumCrawlerOptions != null)
             {
-                startingFolderFullPath = MapPath(_albumCrawlerOptions.AlbumRoot);
                 extensions = _albumCrawlerOptions.PhotoExtensions;
             }
-            return GetOrCreateAlbums(startingFolderFullPath, extensions);
+            return extensions;
         }
         /// <summary>
         /// Get the albums for the specified folder.  First check the cache, if not found
@@ -95,7 +126,7 @@ namespace AlbumCrawler
         {
             string thumbnail = folder.Files.Count > 0 ? folder.Files[0].Name : "";
 
-            return new Album(folder.Name, folder.Name, "", thumbnail);
+            return new Album(folder.Name, folder.Name, "", thumbnail, folder.Files);
         }
         /// <summary>
         /// Create an Album from the folder.  If there are any overrides in the AlbumCrawlerOptions,
@@ -140,6 +171,18 @@ namespace AlbumCrawler
                 }
             }
             return album;
+        }
+        /// <summary>
+        /// Get the album for the specified path.  Uses the cache to find the album, and if not found
+        /// all albums are crawled and the cache is updated.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public Album GetAlbum(string path)
+        {
+            string startingFolderFullPath = GetStartingFolderFullPath();
+            string[] extensions = GetExtensions();
+            return GetOrCreateAlbums(startingFolderFullPath, extensions).FirstOrDefault(a => a.Path == path);
         }
         /// <summary>
         /// create the wildcard patterns to search for files with the specified extensions.
