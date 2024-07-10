@@ -13,5 +13,12 @@
             Description = description;
             Thumbnail = thumbnail;
         }
+        public Album(Album album)
+        {
+            Name = album.Name;
+            Path = album.Path;
+            Description = album.Description;
+            Thumbnail = album.Thumbnail;
+        }
     }
 }

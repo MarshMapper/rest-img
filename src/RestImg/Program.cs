@@ -9,9 +9,7 @@ namespace RestImg
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddControllers();
-
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -34,8 +32,7 @@ namespace RestImg
             app.UseRestImg(builder.Configuration);
             app.UseStaticFiles();
 
-
-            app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler, IWebHostEnvironment webHost) =>
+            app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler) =>
             {
                 return albumCrawler.Crawl();
             });

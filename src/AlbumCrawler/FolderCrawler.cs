@@ -28,7 +28,6 @@ namespace AlbumCrawler
             HashSet<Folder> folders = CreateFoldersFromMatches(matchingPaths);
 
             return folders;
-
         }
 
         /// <summary>

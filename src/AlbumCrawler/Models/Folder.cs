@@ -1,5 +1,9 @@
 ﻿namespace AlbumCrawler.Models
 {
+    /// <summary>
+    /// represents a folder that contains files that match the patterns used
+    /// while crawling
+    /// </summary>
     public class Folder
     {
         public string Name { get; set; }
