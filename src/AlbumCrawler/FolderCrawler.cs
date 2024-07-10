@@ -1,5 +1,5 @@
-﻿using AlbumCrawler.Models;
-using Microsoft.Extensions.FileSystemGlobbing;
+﻿using Microsoft.Extensions.FileSystemGlobbing;
+using AlbumCrawler.Models;
 
 namespace AlbumCrawler
 {
