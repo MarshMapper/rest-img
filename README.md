@@ -1,7 +1,7 @@
 # rest-img
-.NET RESTful image services including:
-    - image transformation middleware based on the SkiaSharp library.
-    - photo album services that automatically locate and serve images from a given directory.
+.NET RESTful image services including:   
+    - image transformation middleware based on the SkiaSharp library.   
+    - photo album services that automatically locate and serve images from a given directory.   
 
 # RestImgMiddleware
 Dynamically transforms images based on query parameters.  These can be added after the path to any image.
