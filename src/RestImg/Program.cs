@@ -1,5 +1,6 @@
 using RestImgService;
 using AlbumCrawler;
+using AlbumCrawler.Models;
 
 namespace RestImg
 {
@@ -34,7 +35,13 @@ namespace RestImg
 
             app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler) =>
             {
-                return albumCrawler.Crawl();
+                return albumCrawler.GetAlbumSummaries();
+            });
+
+            app.MapGet("/albums/{id}", (PhotoAlbumCrawler albumCrawler, string id) =>
+            {
+                Album? album = albumCrawler.GetAlbum(id);
+                return album is null ? Results.NotFound() : Results.Ok(album);
             });
             app.Run();
         }
