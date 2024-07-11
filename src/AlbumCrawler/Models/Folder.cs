@@ -7,6 +7,7 @@
     public class Folder
     {
         public string Name { get; set; }
+        public string WebPath { get; set; } = "/";
 
         public List<MatchingFile> Files { get; set; } = new List<MatchingFile>();
         public Folder(string name)
