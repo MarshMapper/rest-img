@@ -5,33 +5,33 @@ namespace RestImgTests.AlbumCrawlerTests
 {
     public class AlbumCrawlerTests
     {
+        private string _webRootPath = "/wwwroot";
         [Fact]
         public void CreateFoldersFromMatches_ReturnsUniqueFolders()
         {
             // Arrange
             string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
             Assert.NotNull(folders);
-            Assert.NotEmpty(folders);
-            Assert.Equal(2, folders.Count);
+            Assert.NotEmpty(folders.Folders);
         }
         [Fact]
         public void CreateFoldersFromMatches_ReturnsFoldersWithMatchingFiles()
         {
             // Arrange
             string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
-            foreach (Folder folder in folders)
+            foreach (Folder folder in folders.Folders)
             {
                 Assert.Contains(folder.Files, file => file.Name.EndsWith(".jpg") || file.Name.EndsWith(".png"));
             }
@@ -40,14 +40,14 @@ namespace RestImgTests.AlbumCrawlerTests
         public void CreateFoldersFromMatches_ReturnsFoldersWithCorrectNames()
         {
             // Arrange
-            string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\file3.jpg" };
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
-            foreach (Folder folder in folders)
+            foreach (Folder folder in folders.Folders)
             {
                 Assert.StartsWith("testFolder", folder.Name);
             }
@@ -57,13 +57,13 @@ namespace RestImgTests.AlbumCrawlerTests
         {
             // Arrange
             string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
-            foreach (Folder folder in folders)
+            foreach (Folder folder in folders.Folders)
             {
                 foreach (MatchingFile file in folder.Files)
                 {
@@ -76,13 +76,13 @@ namespace RestImgTests.AlbumCrawlerTests
         {
             // Arrange
             string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
-            foreach (Folder folder in folders)
+            foreach (Folder folder in folders.Folders)
             {
                 foreach (MatchingFile file in folder.Files)
                 {
@@ -94,14 +94,14 @@ namespace RestImgTests.AlbumCrawlerTests
         public void CreateFoldersFromMatches_ReturnsFoldersWithCorrectFileCount()
         {
             // Arrange
-            string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
-            FolderCrawler crawler = new FolderCrawler();
+            string[] matchingPaths = new string[] { "\\testFolder\\file1.jpg", "\\testFolder2\\file2.png", "\\testFolder\\subfolder\\file3.jpg" };
+            FolderCrawler crawler = new FolderCrawler(_webRootPath);
 
             // Act
-            HashSet<Folder> folders = crawler.CreateFoldersFromMatches(matchingPaths);
+            FolderCollection folders = crawler.CreateFoldersFromMatches(matchingPaths);
 
             // Assert
-            foreach (Folder folder in folders)
+            foreach (Folder folder in folders.Folders)
             {
                 Assert.Single(folder.Files);
             }

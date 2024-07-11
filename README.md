@@ -57,13 +57,13 @@ It can be used to create a photo album service, as demonstrated in the included 
 # Using
 To use the AlbumCrawler, add the following line to the ConfigureServices method in the Startup class:
 
-			builder.Services.AddAlbumCrawler(builder.Configuration);
+            builder.Services.AddAlbumCrawler(builder.Configuration);
 
 Then PhotoAlbumCaller can be injected and used in Minimal APIs or controllers:
 
             app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler) =>
             {
-                return albumCrawler.GetAlbumSummaries();
+                return albumCrawler.Crawl();
             });
 
             app.MapGet("/albums/{id}", (PhotoAlbumCrawler albumCrawler, string id) =>
@@ -72,12 +72,14 @@ Then PhotoAlbumCaller can be injected and used in Minimal APIs or controllers:
                 return album is null ? Results.NotFound() : Results.Ok(album);
             });
 
+The first call above will return a list of albums, while the second will return the photos in the specified album.
+
 # Roadmap
 There are several general purpose image content delivery networks but most do much more than simple resizing, and are not written in .NET.
 
 This is simple image transformation middleware for .NET that provides the functinality required to use Angular's NgOptimizedImage.
 This will allow simple self-hosting of images while using the directive.
 
-The next step will be to provide the required loader:
+A future step will be to provide the required loader, or make the middleware compatible with an existing one: 
 
 [Configuring an image loader for NgOptimizedImage](https://angular.io/guide/image-directive#configuring-an-image-loader-for-ngoptimizedimage)

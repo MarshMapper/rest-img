@@ -28,10 +28,10 @@ namespace AlbumCrawler
         /// return the cached list of Albums
         /// </summary>
         /// <returns></returns>
-        public List<Album>? Get(string startingFolderFullPath)
+        public AlbumCollection? Get(string startingFolderFullPath)
         {
             string cacheKey = GetCacheKey(startingFolderFullPath);
-            List<Album>? albums;
+            AlbumCollection? albums;
             bool isCached = _memoryCache.TryGetValue(cacheKey, out albums);
 
             if (isCached)
@@ -45,7 +45,7 @@ namespace AlbumCrawler
         /// cache the given list of albums
         /// </summary>
         /// <param name="albums"></param>
-        public void Set(List<Album> albums, string startingFolderFullPath)
+        public void Set(AlbumCollection albums, string startingFolderFullPath)
         {
             TimeSpan expirationSeconds = TimeSpan.FromSeconds(_options.CacheDuration);
 

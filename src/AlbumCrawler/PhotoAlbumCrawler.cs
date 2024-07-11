@@ -32,12 +32,12 @@ namespace AlbumCrawler
         /// for each.  If there are any overrides in the AlbumCrawlerOptions, apply them.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<Album> Crawl()
+        public AlbumCollection Crawl()
         {
-            string startingFolderFullPath = GetStartingFolderFullPath();
+            string startingFolderPath = GetStartingFolderPath();
             string[] extensions = GetExtensions();
 
-            return GetOrCreateAlbums(startingFolderFullPath, extensions);
+            return GetOrCreateAlbums(startingFolderPath, extensions);
         }
         /// <summary>
         /// Get the album summaries that contain description, etc but not the list of files.
@@ -45,21 +45,21 @@ namespace AlbumCrawler
         /// <returns></returns>
         public IEnumerable<AlbumDto> GetAlbumSummaries()
         {
-            return Crawl().Select(a => new AlbumDto(a));
+            return Crawl().Albums.Select(a => new AlbumDto(a));
         }
         /// <summary>
         /// Get defualt starting folder full path.  If the AlbumCrawlerOptions specifies a starting folder, use it.
         /// </summary>
         /// <returns></returns>
-        public string GetStartingFolderFullPath()
+        public string GetStartingFolderPath()
         {
-            string startingFolderFullPath = ".";
+            string startingFolderWebPath = ".";
 
             if (_albumCrawlerOptions != null)
             {
-                startingFolderFullPath = _albumCrawlerOptions.AlbumRoot;
+                startingFolderWebPath = _albumCrawlerOptions.AlbumRoot;
             }
-            return MapPath(startingFolderFullPath);
+            return startingFolderWebPath;
         }
         /// <summary>
         /// Get the extensions to search for.  If the AlbumCrawlerOptions specifies extensions, use them.
@@ -79,18 +79,18 @@ namespace AlbumCrawler
         /// Get the albums for the specified folder.  First check the cache, if not found
         /// then crawl the folder and cache the results.
         /// </summary>
-        /// <param name="startingFolderFullPath"></param>
+        /// <param name="startingFolderWebPath"></param>
         /// <param name="extensions"></param>
         /// <returns></returns>
-        public IEnumerable<Album> GetOrCreateAlbums(string startingFolderFullPath, string[] extensions)
+        public AlbumCollection GetOrCreateAlbums(string startingFolderWebPath, string[] extensions)
         {
-            IEnumerable<Album>? albums = _albumCache.Get(startingFolderFullPath);
+            AlbumCollection? albums = _albumCache.Get(startingFolderWebPath);
 
             if (albums == null)
             {
                 // not found in cache, crawl the folder and cache the results
-                List<Album> foundAlbums = GetAlbums(startingFolderFullPath, extensions);
-                _albumCache.Set(foundAlbums, startingFolderFullPath);
+                AlbumCollection foundAlbums = GetAlbums(startingFolderWebPath, extensions);
+                _albumCache.Set(foundAlbums, startingFolderWebPath);
                 albums = foundAlbums;
             }
 
@@ -99,78 +99,17 @@ namespace AlbumCrawler
         /// <summary>
         /// Get the albums for the specified folder.  Use FolderCrawler to find all folders containing photos
         /// </summary>
-        /// <param name="startingFolderFullPath"></param>
+        /// <param name="startingFolderWebPath"></param>
         /// <param name="extensions"></param>
         /// <returns></returns>
-        public List<Album> GetAlbums(string startingFolderFullPath, string[] extensions)
+        public AlbumCollection GetAlbums(string startingFolderWebPath, string[] extensions)
         {
-            FolderCrawler folderCrawler = new();
+            FolderCrawler folderCrawler = new(_webHostEnvironment.WebRootPath);
 
-            IEnumerable<Folder> folders = folderCrawler.Crawl(startingFolderFullPath, GetWildcardPatterns(extensions));
-            List<Album> albums = new List<Album>();
+            FolderCollection folders = folderCrawler.Crawl(startingFolderWebPath, GetWildcardPatterns(extensions));
+            AlbumCollection albumCollection = new(folders, _albumCrawlerOptions);
 
-            foreach (Folder folder in folders)
-            {
-                albums.Add(CreateAlbumFromFolder(folder));
-            }
-
-            return albums;
-        }
-        /// <summary>
-        /// Create a default Album from the folder.  The default Album uses the Name of the 
-        /// folder for both the name and path.  The thumbnail is the first file in the folder.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        public Album CreateDefaultAlbumFromFolder(Folder folder)
-        {
-            string thumbnail = folder.Files.Count > 0 ? folder.Files[0].Name : "";
-
-            return new Album(folder.Name, folder.Name, "", thumbnail, folder.Files);
-        }
-        /// <summary>
-        /// Create an Album from the folder.  If there are any overrides in the AlbumCrawlerOptions,
-        /// use them to provide more meaningful values for the Album.
-        /// </summary>
-        /// <param name="folder"></param>
-        /// <returns></returns>
-        public Album CreateAlbumFromFolder(Folder folder)
-        {
-            Album defaultAlbum = CreateDefaultAlbumFromFolder(folder);
-
-            return MergeWithOverrides(defaultAlbum);
-        }
-        /// <summary>
-        /// Given the album automatically created from the folder, merge any overrides
-        /// specified in the AlbumCrawlerOptions.
-        /// </summary>
-        /// <param name="defaultAlbum"></param>
-        /// <returns></returns>
-        public Album MergeWithOverrides(Album defaultAlbum)
-        {
-            Album album = defaultAlbum;
-            if (_albumCrawlerOptions.Albums != null && _albumCrawlerOptions.Albums.Length > 0)
-            {
-                album = new Album(defaultAlbum);
-
-                AlbumOptions? albumOptions = _albumCrawlerOptions.Albums.FirstOrDefault(a => a.Path == defaultAlbum.Path);
-                if (albumOptions != null)
-                {
-                    if (!String.IsNullOrEmpty(albumOptions.Name))
-                    {
-                        album.Name = albumOptions.Name;
-                    }
-                    if (!String.IsNullOrEmpty(albumOptions.Description))
-                    {
-                        album.Description = albumOptions.Description;
-                    }
-                    if (!String.IsNullOrEmpty(albumOptions.Thumbnail))
-                    {
-                        album.Thumbnail = albumOptions.Thumbnail;
-                    }
-                }
-            }
-            return album;
+            return albumCollection;
         }
         /// <summary>
         /// Get the album for the specified path.  Uses the cache to find the album, and if not found
@@ -178,11 +117,11 @@ namespace AlbumCrawler
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public Album GetAlbum(string path)
+        public Album? GetAlbum(string path)
         {
-            string startingFolderFullPath = GetStartingFolderFullPath();
+            string startingFolderWebPath = GetStartingFolderPath();
             string[] extensions = GetExtensions();
-            return GetOrCreateAlbums(startingFolderFullPath, extensions).FirstOrDefault(a => a.Path == path);
+            return GetOrCreateAlbums(startingFolderWebPath, extensions).Albums.FirstOrDefault(a => a.Path == path);
         }
         /// <summary>
         /// create the wildcard patterns to search for files with the specified extensions.
@@ -202,18 +141,6 @@ namespace AlbumCrawler
 
             return patterns;
         }
-        /// <summary>
-        /// maps the path relative to the web root to a full path.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        protected string MapPath(string path)
-        {
-            if (path.EndsWith("/") || path.EndsWith("\\"))
-            {
-                path = path.Remove(path.Length - 1);
-            }
-            return _webHostEnvironment.WebRootPath + path;
-        }
+
     }
 }

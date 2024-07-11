@@ -2,7 +2,11 @@
 {
     public class Album
     { 
+        // unique name for this album.  it is the name of the folder that contains the album.
+        // these must be unique even across subfolders.
         public string Name { get; set; } = String.Empty;
+        // the path to the album.  this is the path to the folder that contains the album, relative
+        // to the web root.
         public string Path { get; set; } = String.Empty;
         public string Description { get; set; } = String.Empty;
         public string Thumbnail { get; set; } = String.Empty;
