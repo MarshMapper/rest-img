@@ -35,7 +35,7 @@ namespace RestImg
 
             app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler) =>
             {
-                return albumCrawler.Crawl();
+                return albumCrawler.GetAlbumSummaries();
             });
 
             app.MapGet("/albums/{id}", (PhotoAlbumCrawler albumCrawler, string id) =>
