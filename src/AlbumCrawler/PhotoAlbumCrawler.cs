@@ -43,9 +43,9 @@ namespace AlbumCrawler
         /// Get the album summaries that contain description, etc but not the list of files.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<AlbumDto> GetAlbumSummaries()
+        public AlbumCollectionDto GetAlbumSummaries()
         {
-            return Crawl().Albums.Select(a => new AlbumDto(a));
+            return new AlbumCollectionDto(Crawl());
         }
         /// <summary>
         /// Get defualt starting folder full path.  If the AlbumCrawlerOptions specifies a starting folder, use it.
