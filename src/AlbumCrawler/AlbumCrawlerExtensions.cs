@@ -6,6 +6,11 @@ namespace AlbumCrawler
 {
     public static class AlbumCrawlerExtensions
     {
+        /// <summary>
+        /// Adds the services required for the AlbumCrawler
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configurationManager"></param>
         public static void AddAlbumCrawler(this IServiceCollection services,
             ConfigurationManager configurationManager)
         {

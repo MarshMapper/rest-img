@@ -33,11 +33,13 @@ namespace RestImg
             app.UseRestImg(builder.Configuration);
             app.UseStaticFiles();
 
+            // add endpoint to get all albums found by the crawler
             app.MapGet("/albums", (PhotoAlbumCrawler albumCrawler) =>
             {
                 return albumCrawler.GetAlbumSummaries();
             });
 
+            // add endpoint to get a specific album by id
             app.MapGet("/albums/{id}", (PhotoAlbumCrawler albumCrawler, string id) =>
             {
                 Album? album = albumCrawler.GetAlbum(id);

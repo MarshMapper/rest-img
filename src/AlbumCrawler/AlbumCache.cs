@@ -6,6 +6,9 @@ using AlbumCrawler.Models;
 
 namespace AlbumCrawler
 {
+    /// <summary>
+    /// Caches the AlbumCollection found by the crawler
+    /// </summary>
     public class AlbumCache
     {
         private readonly IMemoryCache _memoryCache;
@@ -25,7 +28,7 @@ namespace AlbumCrawler
             return startingFolderFullPath;
         }
         /// <summary>
-        /// return the cached list of Albums
+        /// return the cached AlbumCollection if it exists
         /// </summary>
         /// <returns></returns>
         public AlbumCollection? Get(string startingFolderFullPath)
@@ -42,7 +45,7 @@ namespace AlbumCrawler
             return null;
         }
         /// <summary>
-        /// cache the given list of albums
+        /// cache the given AlbumCollection
         /// </summary>
         /// <param name="albums"></param>
         public void Set(AlbumCollection albums, string startingFolderFullPath)
