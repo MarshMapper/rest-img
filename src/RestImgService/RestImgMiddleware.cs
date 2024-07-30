@@ -17,30 +17,26 @@ namespace RestImgService
         private readonly ILogger<RestImgMiddleware> _logger;
         private readonly DynamicImage _dynamicImage;
         private readonly TransformRequestReader _transformRequestReader;
-        private readonly ImagePath _imagePath;
         private readonly ImageExtension _imageExtension;
 
         public RestImgMiddleware(RequestDelegate next,
             ILogger<RestImgMiddleware> logger,
             DynamicImage dynamicImage,
             TransformRequestReader transformRequestReader,
-            ImagePath imagePath,
             ImageExtension imageExtension)
         {
             _next = next;
             _logger = logger;
             _dynamicImage = dynamicImage;
             _transformRequestReader = transformRequestReader;
-            _imagePath = imagePath;
             _imageExtension = imageExtension;
         }
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, ImagePath imagePath)
         {
             _logger.LogInformation($"RestImg called for URL: {UriHelper.GetDisplayUrl(context.Request)}");
-            // critical to do this right away so other methods can access _imagePath
-            _imagePath.SetContext(context);
 
-            TransformRequest? transformRequest = GetValidTransformRequest(context);
+            imagePath.SetContext(context);
+            TransformRequest? transformRequest = GetValidTransformRequest(context, imagePath);
             if (transformRequest == null)
             {
                 // if request was not for a resized image or was invalid, let the next middleware handle it
@@ -49,13 +45,13 @@ namespace RestImgService
             }
             _logger.LogInformation($"RestImg valid request: Width: {transformRequest.Width}, Height: {transformRequest.Height}");
 
-            if (!File.Exists(_imagePath.MapImagePath()))
+            if (!File.Exists(imagePath.MapImagePath()))
             {
                 await _next.Invoke(context);
                 return;
             }
 
-            using (var imageData = _dynamicImage.GetImageData(_imagePath, transformRequest))
+            using (var imageData = _dynamicImage.GetImageData(imagePath, transformRequest))
             {
                 // provide the response and terminate the pipeline
                 context.Response.ContentType = _imageExtension.GetContentType(transformRequest.Format);
@@ -64,13 +60,13 @@ namespace RestImgService
             }
         }
 
-        private TransformRequest? GetValidTransformRequest(HttpContext context)
+        private TransformRequest? GetValidTransformRequest(HttpContext context, ImagePath imagePath)
         {
             TransformRequest? transformRequest = null;
             PathString path = context.Request.Path;
 
             // first check if the request is for an image and has query parameters
-            if (path != null && path.HasValue && context.Request.Query.Count > 0 && _imagePath.IsImageRequest())
+            if (path != null && path.HasValue && context.Request.Query.Count > 0 && imagePath.IsImageRequest())
             {
                 // get the transformation parameters from the query string
                 transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
