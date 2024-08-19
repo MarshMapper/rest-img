@@ -7,10 +7,10 @@ namespace RestImgService.ImageTransform
         public TransformRequestReader()
         {
         }
-        public TransformRequest ReadRequest(IQueryCollection queryCollection)
+        public TransformRequest ReadRequest(IQueryCollection queryCollection, int defaultQuality)
         {
             string format = "jpeg";
-            int quality = 75;
+            int quality = defaultQuality;
             int width = 0;
             int height = 0;
 
