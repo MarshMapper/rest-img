@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RestImgService.ImageFile;
 using RestImgService.ImageTransform;
 
@@ -18,18 +18,21 @@ namespace RestImgService
         private readonly DynamicImage _dynamicImage;
         private readonly TransformRequestReader _transformRequestReader;
         private readonly ImageExtension _imageExtension;
+        private readonly ImageResizerOptions _imageResizerOptions;
 
         public RestImgMiddleware(RequestDelegate next,
             ILogger<RestImgMiddleware> logger,
             DynamicImage dynamicImage,
             TransformRequestReader transformRequestReader,
-            ImageExtension imageExtension)
+            ImageExtension imageExtension,
+            IOptions<ImageResizerOptions> imageResizerOptions)
         {
             _next = next;
             _logger = logger;
             _dynamicImage = dynamicImage;
             _transformRequestReader = transformRequestReader;
             _imageExtension = imageExtension;
+            _imageResizerOptions = imageResizerOptions.Value;
         }
         public async Task InvokeAsync(HttpContext context, ImagePath imagePath)
         {
@@ -69,8 +72,8 @@ namespace RestImgService
             if (path != null && path.HasValue && context.Request.Query.Count > 0 && imagePath.IsImageRequest())
             {
                 // get the transformation parameters from the query string
-                transformRequest = _transformRequestReader.ReadRequest(context.Request.Query);
-                if (!transformRequest.IsValid())
+                transformRequest = _transformRequestReader.ReadRequest(context.Request.Query, _imageResizerOptions.DefaultQuality);
+                if (!transformRequest.IsValid(_imageResizerOptions))
                 {
                     // don't return an invalid request
                     transformRequest = null;

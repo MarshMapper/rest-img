@@ -9,7 +9,9 @@ namespace RestImgService
 {
     public static class RestImgMiddlewareExtensions
     {
-        public const string CachingSection = "Caching";
+        public const string ProjectSection = "RestImg";
+        public const string ImageResizerSection = "ImageResizer";
+        public const string CachingSection = $"{ProjectSection}:{ImageResizerSection}:Caching";
         public static OutputCacheOptions GetOutputCacheOptions(ConfigurationManager configurationManager)
         {
             OutputCacheOptions outputCacheOptions = new();
@@ -53,6 +55,8 @@ namespace RestImgService
                 configurationManager.GetSection($"{CachingSection}:{OutputCacheOptions.OutputCache}"));
             services.Configure<ImageCacheOptions>(
                 configurationManager.GetSection($"{CachingSection}:{ImageCacheOptions.ImageCache}"));
+            services.Configure<ImageResizerOptions>(
+                configurationManager.GetSection(ImageResizerOptions.ImageResizer));
         }
     }
 }

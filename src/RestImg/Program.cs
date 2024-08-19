@@ -10,12 +10,19 @@ namespace RestImg
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.Configure<CorsHostOptions>(builder.Configuration.GetSection(CorsHostOptions.Cors));
+
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(policy =>
+                CorsHostOptions? corsSettings = builder.Configuration.GetSection(CorsHostOptions.Cors).Get<CorsHostOptions>();
+
+                if (!(corsSettings is null) && corsSettings.AllowedHosts.Length > 0)
                 {
-                    policy.WithOrigins("https://delightful-wave-003abae10.5.azurestaticapps.net");
-                });
+                    options.AddDefaultPolicy(policy =>
+                    {
+                        policy.WithOrigins(corsSettings.AllowedHosts);
+                    });
+                }
             });
 
             builder.Services.AddControllers();
